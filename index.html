@@ -99,34 +99,24 @@ font-size: 3em;
 </head>
 <body>
     <div  class="board" id="board">
-    <div class="cell" data-cell></div>
-    <div class="cell" data-cell></div>
-    <div class="cell" data-cell></div>
-    <div class="cell" data-cell></div>
-    <div class="cell" data-cell></div>
-    <div class="cell" data-cell></div>
-    <div class="cell" data-cell></div>
-    <div class="cell" data-cell></div>
-    <div class="cell" data-cell></div>
+    <div class="cell" data-cell id="a"></div>
+    <div class="cell" data-cell id="b"></div>
+    <div class="cell" data-cell id="c"></div>
+    <div class="cell" data-cell id="d"></div>
+    <div class="cell" data-cell id="e"></div>
+    <div class="cell" data-cell id="f"></div>
+    <div class="cell" data-cell id="g"></div>
+    <div class="cell" data-cell id="h"></div>
+    <div class="cell" data-cell id="i"></div>
 </div>
 <div class="winning-message" id="winningMessage">
     <div data-winning-message-text></div>
     <button id="restartButton">Restsrt</button>
 </div>
-<!-- <script src="/socket.io/socket.io.js"></script>
-<script>
-  var socket = io();
-</script> -->
-<script>
 
-// function on(e) {
-//     e.preventDefault();
-//     if (input.value) {
-//       socket.emit('chat message', input.value);
-//       input.value = '';
-//     }
-//   }
-
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    
 const X_CLASS = 'x'
 const CIRCLE_CLASS = 'circle'
 const WINNING_COMBINATIONS = [
@@ -147,6 +137,7 @@ const restartButton = document.getElementById('restartButton')
 let circleTurn
 
 startGame()
+
 restartButton.addEventListener('click', startGame)
 
 function startGame() {
@@ -161,14 +152,16 @@ function startGame() {
     winningMessageElement.classList.remove('show')
 }
 
-
-
-
 function handleClick(e) {
 
     const cell = e.target
+    console.log(e.path[0].id);
+    var id=e.path[0].id
+    console.log('id',id);
     const currentClass = circleTurn ? CIRCLE_CLASS : X_CLASS
     placeMark(cell, currentClass)
+
+    socket.emit('turn',id)
     if (checkWin(currentClass)) {
         endGame(false)
     } else if (isDraw()) {
@@ -176,14 +169,31 @@ function handleClick(e) {
     } else {
         swapTurns()
     }
+    
+    
 }
-
 
 function placeMark(cell, currentClass) {
     if (circleTurn)
          {cell.innerHTML = 'O'}
     else { cell.innerHTML = 'X' }
     cell.classList.add(currentClass)
+}
+
+function updateAllClyent(cell){
+    const currentClass = circleTurn ? CIRCLE_CLASS : X_CLASS
+    console.log(cell);
+    const cellE = document.getElementById(`${cell}`)
+    console.log(cellE);
+    placeMark(cellE,currentClass)
+    if (checkWin(currentClass)) {
+        endGame(false)
+    } else if (isDraw()) {
+        endGame(true)
+    } else {
+        swapTurns()
+    }
+
 }
 
 function swapTurns() {
@@ -215,6 +225,12 @@ function isDraw() {
     })
 }
     
+var socket = io();
+  socket.on('recive-turn',e => {
+    console.log('recive');
+    updateAllClyent(e)
+})
+
 </script>
 
 </body>

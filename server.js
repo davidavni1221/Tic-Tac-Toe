@@ -14,8 +14,13 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('user disconnected');
+
   });
-  
+  socket.on('turn',(cell)  => {
+    console.log('cell',cell);
+    socket.broadcast.emit('recive-turn',cell)
+    
+  });
 });
 
 server.listen(3030, () => {
